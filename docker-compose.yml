@@ -1,0 +1,51 @@
+  version: '3.8'
+
+  services:
+    user_service:
+      build:
+        context: ./user_service
+      ports:
+        - "6000:6000"
+      networks:
+        - microservices-net
+
+
+
+      environment:
+        - DB_NAME=user_db
+        - DB_USER=user
+        - DB_PASSWORD=password
+        - DB_HOST=postgres_users
+        - DB_PORT=5432
+      depends_on:
+        - postgres_users
+
+    postgres_users:
+      image: postgres:15
+      restart: always
+      environment:
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: user_db
+      ports:
+        - "5432:5432"
+      networks:
+        - microservices-net
+
+
+
+    order_service:
+      build:
+        context: ./order_service
+      ports:
+        - "5000:5000" 
+      networks:
+        - microservices-net
+      depends_on:
+        - user_service
+
+
+
+  networks:
+    microservices-net:
+      driver: bridge
