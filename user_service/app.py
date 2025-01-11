@@ -17,7 +17,9 @@ def initialize_database():
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(80) NOT NULL,
-        email VARCHAR(120) UNIQUE NOT NULL
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(120) UNIQUE NOT NULL,
+        admin BOOL NOT NULL
     );
     """
     try:
@@ -39,7 +41,7 @@ def get_db_connection():
 @app.route('/users', methods=['POST'])
 def create_user():
     data = request.json
-    if not data or not data.get('name') or not data.get('email'):
+    if not data or not data.get('name') or not data.get('password') or not data.get('email') or not data.get('admin'):
         return jsonify({"error": "Invalid input"}), 400
 
     try:
@@ -47,13 +49,13 @@ def create_user():
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO users (name, email) VALUES (%s, %s) RETURNING id;",
-            (data['name'], data['email'])
+            "INSERT INTO users (name, password, email, admin) VALUES (%s, %s, %s, %s) RETURNING id;",
+            (data['name'], data['password'], data['email'], data['admin'])
         )
         user_id = cursor.fetchone()[0]
         conn.commit()
 
-        return jsonify({"id": user_id, "name": data['name'], "email": data['email']}), 201
+        return jsonify({"id": user_id, "name": data['name'], "password":data['password'], "email": data['email'], "admin":data['admin']}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:

@@ -1,37 +1,27 @@
 from flask import Blueprint, request, jsonify
-from model import Order
-import requests
+from model import Event
 
 management_blueprint = Blueprint('management', __name__)
 
-##orders = {}  
+management = {}
 
-def verificar_utilizador(user_id):
+@management_blueprint.route('/<int:event_id>', methods=['GET'])
+def get_event(event_id):
+    event = management.get(event_id)
+    if event:
+        return jsonify(event.to_dict())
+    return jsonify({'error': 'Event not found'}), 404
+
+@management_blueprint.route('/', methods=['POST'])
+def create_event():
+    event_data = request.json
+
+    if not event_data.get('event') or not event_data.get('local') or not event_data.get('event_data') or not event_data.get('start_time') or not event_data.get('end_time'):
+        return jsonify({"error": "Invalid input"}), 400
     
-    try:
-        response = requests.get(f'http://localhost:6000/users/{user_id}')
-        if response.status_code == 200:
-            return True
-        else:
-            return False
-    except requests.exceptions.RequestException as e:
-        print("Erro ao conectar ao User Service:", e)
-        return False
+    #gerar id automaticamente
+    new_id = max(management.keys(), default=0)+1
 
-'''
-@order_blueprint.route('/<int:order_id>', methods=['GET'])
-def get_order(order_id):
-    order = orders.get(order_id)
-    if order:
-        return jsonify(order.to_dict())
-    return jsonify({'error': 'Order not found'}), 404
-
-
-@order_blueprint.route('/', methods=['POST'])
-def create_order():
-    order_data = request.json
-    order = Order(order_id=order_data['order_id'], user_id=order_data['user_id'], product_details=order_data['product_details'])
-    orders[order.order_id] = order
-    return jsonify(order.to_dict()), 201
-    
-'''
+    event_object = Event(event_id=new_id, event=event_data['event'], local=event_data['local'], event_data=event_data['event_data'], start_time=event_data['start_time'], end_time=event_data['end_time'], info = event_data['info'])
+    management[event_object.event_id] = event_object
+    return jsonify(event_object.to_dict()), 201

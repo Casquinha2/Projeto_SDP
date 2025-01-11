@@ -1,51 +1,91 @@
-  version: '3.8'
+version: '3.8'
 
-  services:
-    user_service:
-      build:
-        context: ./user_service
-      ports:
-        - "6000:6000"
-      networks:
-        - microservices-net
+services:
+  user_service:
+    build:
+      context: ./user_service
+    ports:
+      - "6000:6000"
+    networks:
+      - microservices-net
+    environment:
+      DB_NAME: user_db
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_HOST: postgres_users
+      DB_PORT: 5432
+    depends_on:
+      - postgres_users
 
-
-
-      environment:
-        - DB_NAME=user_db
-        - DB_USER=user
-        - DB_PASSWORD=password
-        - DB_HOST=postgres_users
-        - DB_PORT=5432
-      depends_on:
-        - postgres_users
-
-    postgres_users:
-      image: postgres:15
-      restart: always
-      environment:
-        POSTGRES_USER: user
-        POSTGRES_PASSWORD: password
-        POSTGRES_DB: user_db
-      ports:
-        - "5432:5432"
-      networks:
-        - microservices-net
+  postgres_users:
+    image: postgres:15
+    restart: always
+    container_name: postgres_users
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_db
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices-net
 
 
 
-    order_service:
-      build:
-        context: ./order_service
-      ports:
-        - "5000:5000" 
-      networks:
-        - microservices-net
-      depends_on:
-        - user_service
+  management_service:
+    build:
+      context: ./management_service
+    ports:
+      - "5000:5000"
+    networks:
+      - microservices-net
+    environment:
+      DB_NAME: management_db
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_HOST: postgres_management
+      DB_PORT: 5432
+    depends_on:
+      - postgres_management
+
+  postgres_management:
+    image: postgres:15
+    container_name: postgres_management
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: management_db
+    ports:
+      - "5434:5432"
+    networks:
+      - microservices-net
 
 
 
-  networks:
-    microservices-net:
-      driver: bridge
+  payment_service:
+    build:
+      context: ./payment_service
+    ports:
+      - "4000:4000"
+    networks:
+      - microservices-net
+
+
+
+  ticket_service:
+    build:
+      context: ./ticket_service
+    ports:
+      - "3000:3000"
+    networks:
+      - microservices-net
+   
+
+
+
+
+
+networks:
+  microservices-net:
+    driver: bridge
