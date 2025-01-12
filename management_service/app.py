@@ -50,7 +50,7 @@ def create_user():
 
         cursor.execute(
             "INSERT INTO users (event, local, data, start_time, end_time) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
-            (data['event'], data['local'], data['data'], data['satr_time'], data['end_time'])
+            (data['event'], data['local'], data['data'], data['start_time'], data['end_time'])
         )
         user_id = cursor.fetchone()[0]
         conn.commit()

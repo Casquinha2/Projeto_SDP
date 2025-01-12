@@ -82,6 +82,14 @@ services:
       - microservices-net
    
 
+  php_service: 
+    image: php:7.4-apache 
+    ports: 
+      - "8080:80" 
+    volumes: 
+      - ./php:/var/www/html 
+    networks: 
+      - microservices-net
 
 
 

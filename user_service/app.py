@@ -42,8 +42,15 @@ def get_db_connection():
 def create_user():
     data = request.json
     if not data or not data.get('name') or not data.get('password') or not data.get('email') or not data.get('admin'):
-        return jsonify({"error": "Invalid input"}), 400
+        return jsonify({"error": "Invalid testing input"}), 400
 
+    if data.get('admin') == 1:
+        data['admin'] = True
+    elif data.get('admin') == 2:
+        data['admin'] = False
+    else:
+        return jsonify({"error": "Invalid admin value"}), 400
+    
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -81,3 +88,5 @@ if __name__ == "__main__":
    
     initialize_database()
     app.run(host="0.0.0.0", port=6000)
+
+# docker exec -it postgres_users psql -U user -d user_db

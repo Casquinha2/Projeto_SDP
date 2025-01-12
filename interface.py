@@ -1,4 +1,7 @@
 import requests
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 def register_user():
     print("*** Registar Utilizador ***")
@@ -43,6 +46,7 @@ def make_event():
 
 
 if __name__ == "__main__":
+
     while True:
         opcao = int(input("""
         **** MENU ****
@@ -75,5 +79,4 @@ if __name__ == "__main__":
                 break
             case _:
                 print("Opção inválida. Tente novamente.")
-
 
