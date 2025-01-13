@@ -39,39 +39,42 @@ def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
 @app.route('/management', methods=['POST'])
-def create_user():
+def create_event():
     data = request.json
     if not data or not data.get('event') or not data.get('local') or not data.get('data') or not data.get('start_time') or not data.get('end_time'):
         return jsonify({"error": "Invalid input"}), 400
+    
+    if data.get('info') == 'None':
+        data['info'] = None
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO users (event, local, data, start_time, end_time) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
-            (data['event'], data['local'], data['data'], data['start_time'], data['end_time'])
+            "INSERT INTO users (event, local, data, start_time, end_time, info) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
+            (data['event'], data['local'], data['data'], data['start_time'], data['end_time'], data['info'])
         )
-        user_id = cursor.fetchone()[0]
+        event_id = cursor.fetchone()[0]
         conn.commit()
 
-        return jsonify({"id": user_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time']}), 201
+        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info']}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
 
 @app.route('/management', methods=['GET'])
-def get_users():
+def get_events():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
 
         cursor.execute("SELECT * FROM management;")
-        users = cursor.fetchall()
+        events = cursor.fetchall()
 
-        return jsonify(users), 200
+        return jsonify(events), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:

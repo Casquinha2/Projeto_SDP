@@ -1,9 +1,14 @@
-class Order:
-    def __init__(self, order_id, user_id, product_details):
-        self.order_id = order_id
-        self.user_id = user_id
-        self.product_details = product_details
+class Ticket:
+    def __init__(self, ticket_id, event_id, total_tickets, available_tickets, price, info):
+        self.ticket_id = ticket_id
+        self.event_id = event_id
+        self.total_tickets = total_tickets
+        self.available_tickets = available_tickets
+        self.price = price
+        if info:
+            self.info = info
+        else:
+            self.info = ""
 
     def to_dict(self):
-        return {'order_id': self.order_id,'user_id': self.user_id,
-                'product_details': self.product_details}
+        return {'ticket_id': self.ticket_id,'event_id': self.event_id,'total_tickets':self.total_tickets,'available_tickets':self.available_tickets,'price':self.price,'info':self.info}

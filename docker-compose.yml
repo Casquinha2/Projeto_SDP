@@ -57,7 +57,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: management_db
     ports:
-      - "5434:5432"
+      - "5434:5434"
     networks:
       - microservices-net
 
@@ -78,6 +78,27 @@ services:
       context: ./ticket_service
     ports:
       - "3000:3000"
+    networks:
+      - microservices-net
+    environment:
+      DB_NAME: ticket_db
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_HOST: postgres_ticket
+      DB_PORT: 5432
+    depends_on:
+      - postgres_ticket
+
+  postgres_ticket:
+    image: postgres:15
+    container_name: postgres_ticket
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ticket_db
+    ports:
+      - "5436:5436"
     networks:
       - microservices-net
    

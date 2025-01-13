@@ -5,7 +5,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'];
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
-    $info = $_POST['info'];
+    if ($_POST['info'] != ''){
+        $info = 'None';
+    }else{
+        $info = $_POST['info'];
+    }
+        
 
     $data = ['event' => $event, 'local' => $local, 'data' => $date, 'start_time' => $start_time, 'end_time' => $end_time, 'info' => $info];
 

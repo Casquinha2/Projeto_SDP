@@ -1,12 +1,11 @@
 from flask import Blueprint, request, jsonify
-from model import Order
-import requests
+from model import Ticket
 
 ticket_blueprint = Blueprint('ticket', __name__)
 
-##orders = {}  
+tickets = {}
 
-def verificar_utilizador(user_id):
+'''def verificar_utilizador(user_id):
     
     try:
         response = requests.get(f'http://localhost:6000/users/{user_id}')
@@ -16,21 +15,19 @@ def verificar_utilizador(user_id):
             return False
     except requests.exceptions.RequestException as e:
         print("Erro ao conectar ao User Service:", e)
-        return False
+        return False'''
 
-'''
-@order_blueprint.route('/<int:order_id>', methods=['GET'])
-def get_order(order_id):
-    order = orders.get(order_id)
-    if order:
-        return jsonify(order.to_dict())
+
+@ticket_blueprint.route('/<int:ticket_id>', methods=['GET'])
+def get_ticket(ticket_id):
+    ticket = tickets.get(ticket_id)
+    if ticket:
+        return jsonify(ticket.to_dict())
     return jsonify({'error': 'Order not found'}), 404
 
-@order_blueprint.route('/', methods=['POST'])
-def create_order():
-    order_data = request.json
-    order = Order(order_id=order_data['order_id'], user_id=order_data['user_id'], product_details=order_data['product_details'])
-    orders[order.order_id] = order
-    return jsonify(order.to_dict()), 201
-
-'''
+@ticket_blueprint.route('/', methods=['POST'])
+def create_ticket():
+    ticket_data = request.json
+    ticket = Ticket(ticket_id=ticket_data['ticket_id'],event_id=ticket_data['event_id'],total_tickets=ticket_data['total_tickets'], available_tickets=ticket_data['available_tickets'], price = ticket_data['price'], info=ticket_data['info'])
+    tickets[ticket.ticket_id] = ticket
+    return jsonify(ticket.to_dict()), 201
