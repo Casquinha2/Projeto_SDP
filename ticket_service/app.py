@@ -19,8 +19,7 @@ def initialize_database():
         event_id VARCHAR(5) UNIQUE NOT NULL,
         total_tickets VARCHAR(5) NOT NULL,
         avaiable_tickets VARCHAR(5) NOT NULL,
-        price VARCHAR(5) NOT NULL,
-        info TEXT
+        price VARCHAR(5) NOT NULL
     );
     """
     try:
@@ -44,21 +43,18 @@ def create_ticket():
     if not data or not data.get('event_id') or not data.get('total_tickets') or not data.get('available_tickets') or not data.get('price'):
         return jsonify({"error": "Invalid input"}), 400
 
-    if data.get('info') == 'None':
-        data['info'] = None
-
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO users (event_id, total_tickets, available_tickets, price, info) VALUES (%s, %s, %s, %s, %s) RETURNING id;",
-            (data['event_id'], data['total_tickets'], data['available_tickets'], data['price'], data['info'])
+            "INSERT INTO users (event_id, total_tickets, available_tickets, price, info) VALUES (%s, %s, %s, %s) RETURNING id;",
+            (data['event_id'], data['total_tickets'], data['available_tickets'], data['price'])
         )
         ticket_id = cursor.fetchone()[0]
         conn.commit()
 
-        return jsonify({"id": ticket_id, "event_id": data['event_id'], "total_tickets":data['total_tickets'], "available_tickets": data['available_tickets'], "price": data['price'], "info": data['info']}), 201
+        return jsonify({"id": ticket_id, "event_id": data['event_id'], "total_tickets":data['total_tickets'], "available_tickets": data['available_tickets'], "price": data['price']}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:

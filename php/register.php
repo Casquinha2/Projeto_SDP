@@ -4,10 +4,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $password = $_POST['password'];
     $email = $_POST['email'];
-    $admin_value = isset($_POST['admin']);
-    if ($admin_value == 1) {
-        $admin = 1;
-    }
 
 
     $data = ['name' => $name, 'password' => $password, 'email' => $email, 'admin' => $admin];
@@ -31,3 +27,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo "Response: $response<br>";
 }
 ?>
+

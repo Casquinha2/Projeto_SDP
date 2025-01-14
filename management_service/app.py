@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import requests
 
 app = Flask(__name__)
 
@@ -14,11 +15,11 @@ DB_CONFIG = {
 
 def initialize_database():
     create_table_query = """
-    CREATE TABLE IF NOT EXISTS management (
+    CREATE TABLE IF NOT EXISTS events (
         id SERIAL PRIMARY KEY,
         event VARCHAR(80) NOT NULL,
         local VARCHAR(120) NOT NULL,
-        data VARCHAR(120) UNIQUE NOT NULL,
+        data VARCHAR(120) NOT NULL,
         start_time VARCHAR(60) NOT NULL,
         end_time VARCHAR(60) NOT NULL,
         info TEXT
@@ -31,7 +32,7 @@ def initialize_database():
         conn.commit()
         cursor.close()
         conn.close()
-        print("Tabela 'management' inicializada com sucesso.")
+        print("Tabela 'events' inicializada com sucesso.")
     except Exception as e:
         print(f"Erro ao inicializar a tabela: {e}")
 
@@ -52,17 +53,26 @@ def create_event():
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO users (event, local, data, start_time, end_time, info) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
+            "INSERT INTO events (event, local, data, start_time, end_time, info) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
             (data['event'], data['local'], data['data'], data['start_time'], data['end_time'], data['info'])
         )
         event_id = cursor.fetchone()[0]
         conn.commit()
 
-        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info']}), 201
+        
+        ticket_data = { "event_id": event_id, "total_tickets": data['total_tickets'], "available_tickets": data['total_tickets'], "price": data['price'] } 
+        response = requests.post("http://ticket_service/ticket", json=ticket_data)
+
+        if response.status_code != 201: 
+            return jsonify({"error": "Failed to create tickets"}), 500
+
+        ticket_id = response.json().get('id')
+        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info'], "ticket_id": ticket_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
 
 @app.route('/management', methods=['GET'])
 def get_events():

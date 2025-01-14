@@ -12,14 +12,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
+
+    session_start();
+    
     $response = curl_exec($ch);
     $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-
+    
+    $response_data = json_decode($response, true);
+    
     if ($status_code == 200) {
-        echo "Login successful! Response: $response<br>";
+        if ($response_data['admin'] == 1) {
+            header('Location: admin.php');
+        } else {
+            header('Location: main.php');
+        }
+        exit();
     } else {
-        echo "Login failed! Response: $response<br>";
+        $_SESSION['error_message'] = "Utilizador não encontrado: Por favor, verifique se o nome e a password estão corretos.";
+        header('Location: index.php'); 
+        exit();
     }
+
+    
 }
 ?>

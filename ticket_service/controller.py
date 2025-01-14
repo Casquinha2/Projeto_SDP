@@ -28,6 +28,6 @@ def get_ticket(ticket_id):
 @ticket_blueprint.route('/', methods=['POST'])
 def create_ticket():
     ticket_data = request.json
-    ticket = Ticket(ticket_id=ticket_data['ticket_id'],event_id=ticket_data['event_id'],total_tickets=ticket_data['total_tickets'], available_tickets=ticket_data['available_tickets'], price = ticket_data['price'], info=ticket_data['info'])
+    ticket = Ticket(ticket_id=ticket_data['ticket_id'],event_id=ticket_data['event_id'],total_tickets=ticket_data['total_tickets'], available_tickets=ticket_data['available_tickets'], price = ticket_data['price'])
     tickets[ticket.ticket_id] = ticket
     return jsonify(ticket.to_dict()), 201
