@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 import psycopg2
 from psycopg2.extras import RealDictCursor
-import requests
 
 app = Flask(__name__)
 
@@ -22,7 +21,10 @@ def initialize_database():
         data VARCHAR(120) NOT NULL,
         start_time VARCHAR(60) NOT NULL,
         end_time VARCHAR(60) NOT NULL,
-        info TEXT
+        info TEXT,
+        ticket_total INTEGER NOT NULL,
+        ticket_available INTEGER NOT NULL,
+        ticket_price FLOAT NOT NULL
     );
     """
     try:
@@ -42,7 +44,7 @@ def get_db_connection():
 @app.route('/management', methods=['POST'])
 def create_event():
     data = request.json
-    if not data or not data.get('event') or not data.get('local') or not data.get('data') or not data.get('start_time') or not data.get('end_time'):
+    if not data or not data.get('event') or not data.get('local') or not data.get('data') or not data.get('start_time') or not data.get('end_time') or not data.get('ticket_total') or not data.get('ticket_available') or not data.get('ticket_price'):
         return jsonify({"error": "Invalid input"}), 400
     
     if data.get('info') == 'None':
@@ -53,26 +55,17 @@ def create_event():
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO events (event, local, data, start_time, end_time, info) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id;",
-            (data['event'], data['local'], data['data'], data['start_time'], data['end_time'], data['info'])
+            "INSERT INTO events (event, local, data, start_time, end_time, info, ticket_total, ticket_available, ticket_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
+            (data['event'], data['local'], data['data'], data['start_time'], data['end_time'], data['info'], data['ticket_total'], data['ticket_available'], data['ticket_price'])
         )
         event_id = cursor.fetchone()[0]
         conn.commit()
-
-        
-        ticket_data = { "event_id": event_id, "total_tickets": data['total_tickets'], "available_tickets": data['total_tickets'], "price": data['price'] } 
-        response = requests.post("http://ticket_service/ticket", json=ticket_data)
-
-        if response.status_code != 201: 
-            return jsonify({"error": "Failed to create tickets"}), 500
-
-        ticket_id = response.json().get('id')
-        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info'], "ticket_id": ticket_id}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
+        cursor.close()
         conn.close()
 
+        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info'], "ticket_total": data['ticket_total'], "ticket_available": data['ticket_available'], "ticket_price": data['ticket_price']}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/management', methods=['GET'])
 def get_events():
@@ -80,15 +73,14 @@ def get_events():
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-
-        cursor.execute("SELECT * FROM management;")
+        cursor.execute("SELECT * FROM events;")
         events = cursor.fetchall()
+        cursor.close()
+        conn.close()
 
         return jsonify(events), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    finally:
-        conn.close()
 
 if __name__ == '__main__':
 

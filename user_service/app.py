@@ -27,10 +27,19 @@ def initialize_database():
         cursor = conn.cursor()
         cursor.execute(create_table_query)
         conn.commit()
+        
+        # Create admin user if not exists
+        cursor.execute(
+            "INSERT INTO users (name, password, email, admin) VALUES (%s, %s, %s, %s) RETURNING id;",
+            ('Admin', 'Admin123', 'admin@email.com', True)
+        )
+        conn.commit()
+
         cursor.close()
         conn.close()
-        admin_user()
-        print("Tabela 'users' inicializada com sucesso.")
+        print("Tabela 'users' inicializada com sucesso, e administrador adicionado.")
+    except psycopg2.errors.UniqueViolation:
+        print("Admin já existe.")
     except Exception as e:
         print(f"Erro ao inicializar a tabela: {e}")
 
@@ -40,28 +49,23 @@ def get_db_connection():
 @app.route('/users', methods=['POST'])
 def create_user():
     data = request.json
-    if not data or not data.get('name') or not data.get('password') or not data.get('email') or not data.get('admin'):
-        return jsonify({"error": "Invalid testing input"}), 400
+    if not data or not data.get('name') or not data.get('password') or not data.get('email'):
+        return jsonify({"error": "Entrada inválida"}), 400
 
-    if data.get('admin') == 1:
-        data['admin'] = True
-    elif data.get('admin') == 2:
-        data['admin'] = False
-    else:
-        return jsonify({"error": "Invalid admin value"}), 400
-    
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute(
             "INSERT INTO users (name, password, email, admin) VALUES (%s, %s, %s, %s) RETURNING id;",
-            (data['name'], data['password'], data['email'], data['admin'])
+            (data['name'], data['password'], data['email'], False)
         )
         user_id = cursor.fetchone()[0]
         conn.commit()
 
-        return jsonify({"id": user_id, "name": data['name'], "password":data['password'], "email": data['email'], "admin":data['admin']}), 201
+        return jsonify({"id": user_id, "name": data['name'], "password":data['password'], "email": data['email'], "admin":False}), 201
+    except psycopg2.errors.UniqueViolation:
+        return jsonify({"error": "Email já cadastrado"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
@@ -72,34 +76,30 @@ def verificar_utilizador():
     user_data = request.json
 
     if not user_data or not user_data.get('name') or not user_data.get('password'):
-        return jsonify({"error": "Invalid login input"}), 400
+        return jsonify({"error": "Entrada inválida"}), 400
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        # Fetch all users
-        cursor.execute("SELECT * FROM users;")
-        users = cursor.fetchall()
+        cursor.execute("SELECT * FROM users WHERE name = %s AND password = %s", (user_data['name'], user_data['password']))
+        user = cursor.fetchone()
 
-        for user in users:
-            if user['name'] == user_data['name'] and user['password'] == user_data['password']:
-                return jsonify({"user_id": user['id'], "admin":user['admin']}), 200
-
-        return jsonify({"error": "User not found"}), 404
+        if user:
+            return jsonify({"user_id": user['id'], "admin": user['admin']}), 200
+        else:
+            return jsonify({"error": "Usuário não encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
 
-
+@app.route('/users', methods=['GET'])
 def get_users():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-
-        cursor.execute("SELECT * FROM users;")
+        cursor.execute("SELECT * FROM users")
         users = cursor.fetchall()
 
         return jsonify(users), 200
@@ -108,21 +108,6 @@ def get_users():
     finally:
         conn.close()
 
-def admin_user():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            "INSERT INTO users (name, password, email, admin) VALUES ('Admin', 'Admin123', 'admin@email.com', True) RETURNING id;")
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print(f"Admin já existe")
-
 if __name__ == "__main__":
-   
     initialize_database()
     app.run(host="0.0.0.0", port=6000)
-
-# docker exec -it postgres_users psql -U user -d user_db
