@@ -1,11 +1,6 @@
 <?php
 session_start();
 
-if($_SESSION['user_id'] != 2){
-    header("Location: index.php");
-    exit();
-}
-
 $response_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

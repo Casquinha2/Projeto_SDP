@@ -28,12 +28,15 @@ def initialize_database():
         cursor.execute(create_table_query)
         conn.commit()
         
-        # Create admin user if not exists
-        cursor.execute(
-            "INSERT INTO users (name, password, email, admin) VALUES (%s, %s, %s, %s) RETURNING id;",
-            ('Admin', 'Admin123', 'admin@email.com', True)
-        )
-        conn.commit()
+        cursor.execute("SELECT * FROM users WHERE email = 'admin@email.com'")
+        admin_exist = cursor.fetchone()
+
+        if not admin_exist:
+            cursor.execute(
+                "INSERT INTO users (name, password, email, admin) VALUES (%s, %s, %s, %s) RETURNING id;",
+                ('Admin', 'Admin123', 'admin@email.com', True)
+            )
+            conn.commit()
 
         cursor.close()
         conn.close()

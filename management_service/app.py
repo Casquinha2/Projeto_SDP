@@ -27,6 +27,17 @@ def initialize_database():
         ticket_price FLOAT NOT NULL
     );
     """
+
+
+    #receber id do evento
+
+    #temp_total = total -> temp_available += available
+
+    #if temp_total - 1 <= 0 : (erro) : temp_total -= 1 -> temp_available += 1
+
+    #update BD (receber BD pelo id e mudar os valores acima)
+
+
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
@@ -58,6 +69,7 @@ def create_event():
             "INSERT INTO events (event, local, data, start_time, end_time, info, ticket_total, ticket_available, ticket_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
             (data['event'], data['local'], data['data'], data['start_time'], data['end_time'], data['info'], data['ticket_total'], data['ticket_available'], data['ticket_price'])
         )
+
         event_id = cursor.fetchone()[0]
         conn.commit()
         cursor.close()
