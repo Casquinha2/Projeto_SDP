@@ -70,6 +70,27 @@ services:
       - "4000:4000"
     networks:
       - microservices-net
+    environment:
+      DB_NAME: payment_db
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_HOST: postgres_payment
+      DB_PORT: 5432
+    depends_on:
+      - postgres_payment
+
+  postgres_payment:
+    image: postgres:15
+    container_name: postgres_payment
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: payment_db
+    ports:
+      - "5438:5438"
+    networks:
+      - microservices-net
 
 
 
@@ -101,6 +122,7 @@ services:
       - "5436:5436"
     networks:
       - microservices-net
+   
    
 
   php_service: 

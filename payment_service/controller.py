@@ -1,36 +1,21 @@
 from flask import Blueprint, request, jsonify
-from model import Order
-import requests
+from model import Payment
 
 payment_blueprint = Blueprint('payment', __name__)
 
-##orders = {}  
+payments = {}  
 
-def verificar_utilizador(user_id):
-    
-    try:
-        response = requests.get(f'http://localhost:6000/users/{user_id}')
-        if response.status_code == 200:
-            return True
-        else:
-            return False
-    except requests.exceptions.RequestException as e:
-        print("Erro ao conectar ao User Service:", e)
-        return False
 
-'''
-@order_blueprint.route('/<int:order_id>', methods=['GET'])
-def get_order(order_id):
-    order = orders.get(order_id)
-    if order:
-        return jsonify(order.to_dict())
-    return jsonify({'error': 'Order not found'}), 404
+@payment_blueprint.route('/<int:payment_id>', methods=['GET'])
+def get_payment(payment_id):
+    payment = payments.get(payment_id)
+    if payment:
+        return jsonify(payment.to_dict())
+    return jsonify({'error': 'Payment not found'}), 404
 
-@order_blueprint.route('/', methods=['POST'])
-def create_order():
-    order_data = request.json
-    order = Order(order_id=order_data['order_id'], user_id=order_data['user_id'], product_details=order_data['product_details'])
-    orders[order.order_id] = order
-    return jsonify(order.to_dict()), 201
-
-'''
+@payment_blueprint.route('/', methods=['POST'])
+def create_payment():
+    payment_data = request.json
+    payment = Payment(payment_id=payment_data['payment_id'], event_id=payment_data['event_id'], client_id=payment_data['client_id'], payment_method=payment_data['payment_method'], name=payment_data['name'], card_number=payment_data['card_number'], validation_date=payment_data['validation_date'], cvv=payment_data['cvv'], paypal_email=payment_data['paypal_email'])
+    payments[payment.payment_id] = payment
+    return jsonify(payment.to_dict()), 201
