@@ -12,15 +12,15 @@ services:
       DB_NAME: user_db
       DB_USER: user
       DB_PASSWORD: password
-      DB_HOST: postgres_users
+      DB_HOST: postgres_user
       DB_PORT: 5432
     depends_on:
-      - postgres_users
+      - postgres_user
 
-  postgres_users:
+  postgres_user:
     image: postgres:15
     restart: always
-    container_name: postgres_users
+    container_name: postgres_user
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -57,7 +57,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: management_db
     ports:
-      - "5434:5434"
+      - "5434:5432"
     networks:
       - microservices-net
 
@@ -98,7 +98,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: ticket_db
     ports:
-      - "5436:5436"
+      - "5436:5432"
     networks:
       - microservices-net
    

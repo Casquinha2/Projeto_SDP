@@ -9,7 +9,7 @@ if($_SESSION['user_id'] != 2){
 $response_message = '';
 
 function getEvents() {
-    $url = "http://management_service:5000/management";
+    $url = "http://10.110.234.111/management";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -27,7 +27,7 @@ function getEvents() {
 function createEvent($data){
     global $response_message;
 
-    $url = "http://management_service:5000/management";
+    $url = "http://10.110.234.111/management";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-users
+  name: postgres-management
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-users
+      app: postgres-management
   template:
     metadata:
       labels:
-        app: postgres-users
+        app: postgres-management
     spec:
       containers:
-      - name: postgres-users
+      - name: postgres-management
         image: postgres:15
         ports:
         - containerPort: 5432
@@ -23,15 +23,15 @@ spec:
         - name: POSTGRES_PASSWORD
           value: password
         - name: POSTGRES_DB
-          value: user_db
+          value: management_db
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-users
+  name: postgres-management
 spec:
   selector:
-    app: postgres-users
+    app: postgres-management
   ports:
     - protocol: TCP
       port: 5432

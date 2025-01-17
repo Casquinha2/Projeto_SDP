@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-orders
+  name: postgres-ticket
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-orders
+      app: postgres-ticket
   template:
     metadata:
       labels:
-        app: postgres-orders
+        app: postgres-ticket
     spec:
       containers:
-      - name: postgres-orders
+      - name: postgres-ticket
         image: postgres:15
         ports:
         - containerPort: 5432
@@ -23,15 +23,15 @@ spec:
         - name: POSTGRES_PASSWORD
           value: password
         - name: POSTGRES_DB
-          value: orders_db
+          value: ticket_db
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-orders
+  name: postgres-ticket
 spec:
   selector:
-    app: postgres-orders
+    app: postgres-ticket
   ports:
     - protocol: TCP
       port: 5432

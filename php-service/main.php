@@ -9,7 +9,7 @@ if($_SESSION['user_id'] == 2){
 $user_id = $_SESSION['user_id'];
 
 function getEventsFromManagement() {
-    $url = "http://management_service:5000/management"; 
+    $url = "http://10.110.234.111/management"; 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -55,7 +55,7 @@ function getEventsByIds($event_ids) {
         return [];
     }
 
-    $url = "http://management_service:5000/management";
+    $url = "http://10.110.234.111/management";
     $ids_query = implode(',', $event_ids);
     $url .= "?event_ids=" . urlencode($ids_query);
 
