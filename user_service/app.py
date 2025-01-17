@@ -8,7 +8,7 @@ DB_CONFIG = {
     "dbname": "user_db",
     "user": "user",
     "password": "password",
-    "host": "postgres_users",
+    "host": "postgres_user",
     "port": 5432,
 }
 
@@ -75,11 +75,15 @@ def create_user():
         conn.close()
 
 @app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def verificar_utilizador():
     user_data = request.json
 
     if not user_data or not user_data.get('name') or not user_data.get('password'):
         return jsonify({"error": "Entrada inválida"}), 400
+
+    # Print the incoming user data for debugging
+    print("User Data Received: ", user_data)
 
     try:
         conn = get_db_connection()
@@ -87,6 +91,9 @@ def verificar_utilizador():
 
         cursor.execute("SELECT * FROM users WHERE name = %s AND password = %s", (user_data['name'], user_data['password']))
         user = cursor.fetchone()
+
+        # Print the fetched user for debugging
+        print("User Fetched: ", user)
 
         if user:
             return jsonify({"user_id": user['id'], "admin": user['admin']}), 200
@@ -96,6 +103,7 @@ def verificar_utilizador():
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
 
 @app.route('/users', methods=['GET'])
 def get_users():

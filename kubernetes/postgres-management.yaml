@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-management
+  template:
+    metadata:
+      labels:
+        app: postgres-management
+    spec:
+      containers:
+      - name: postgres-management
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: user
+        - name: POSTGRES_PASSWORD
+          value: password
+        - name: POSTGRES_DB
+          value: management_db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-management
+spec:
+  selector:
+    app: postgres-management
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
