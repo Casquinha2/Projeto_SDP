@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if($_SESSION['user_id'] != 2){
+if($_SESSION['user_id'] != 1){
     header("Location: index.php");
     exit();
 }
@@ -9,7 +9,7 @@ if($_SESSION['user_id'] != 2){
 $response_message = '';
 
 function getEvents() {
-    $url = "http://10.110.234.111/management";
+    $url = "http://management_service:5000/management";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -27,7 +27,7 @@ function getEvents() {
 function createEvent($data){
     global $response_message;
 
-    $url = "http://10.110.234.111/management";
+    $url = "http://management_service:5000/management";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $events = getEvents();
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -155,6 +156,22 @@ $events = getEvents();
         .event-item button:hover {
             background: #d32f2f;
         }
+        .back-button {
+            background: #6c757d;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+            color: white;
+        }
+        .back-button:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -216,6 +233,11 @@ $events = getEvents();
 
             <input type="submit" value="Criar Evento">
         </form>
+
+        <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
     </div>
+    
+
+</div>
 </body>
 </html>

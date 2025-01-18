@@ -16,7 +16,18 @@ spec:
       - name: payment-service
         image: casquinha2/payment_service:latest
         ports:
-        - containerPort: 4000
+        - containerPort: 5000
+        env:
+        - name: DB_NAME
+          value: payment_db
+        - name: DB_USER
+          value: admin
+        - name: DB_PASSWORD
+          value: password
+        - name: DB_HOST
+          value: postgres-payment
+        - name: DB_PORT
+          value: "5432"
 ---
 apiVersion: v1
 kind: Service

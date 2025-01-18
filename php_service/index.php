@@ -13,7 +13,7 @@ function verifyUser(){
         $data = ['name' => $name, 'password' => $password];
     
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://10.101.168.192/login");
+        curl_setopt($ch, CURLOPT_URL, "http://user_service:6000/login");
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -22,8 +22,6 @@ function verifyUser(){
         $response = curl_exec($ch);
         $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-    
-        echo "Response: " . $response . " Status Code: " . $status_code;
     
         $response_data = json_decode($response, true);
     
@@ -39,7 +37,6 @@ function verifyUser(){
             $response_message = "Erro ao fazer login: " . ($response_data['error'] ?? 'Por favor, verifique se o nome e a senha estão corretos.');
         }
     }
-    
 }
 
 // Call the function to handle form submission
@@ -110,14 +107,8 @@ verifyUser();
             background: #1565c0; /* Botões em azul mais escuro ao passar o mouse */
         }
 
-        .error-message {
-            color: #f44336; /* Mensagem de erro em vermelho */
-            padding: 10px;
-            text-align: center;
-        }
-
         .message {
-            color: #007BFF;
+            color: #f44336;
             text-align: center;
             margin-top: 20px;
         }

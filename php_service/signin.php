@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = ['name' => $name, 'password' => $password, 'email' => $email];
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "http://10.101.168.192/users");
+    curl_setopt($ch, CURLOPT_URL, "http://user_service:6000/users");
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

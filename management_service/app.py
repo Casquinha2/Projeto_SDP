@@ -93,6 +93,53 @@ def get_events():
         return jsonify(events), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/management/<int:event_id>', methods=['GET'])
+def get_event_by_id(event_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("SELECT * FROM events WHERE id = %s;", (event_id,))
+        event = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if event:
+            return jsonify(event), 200
+        else:
+            return jsonify({"error": "Event not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/management', methods=['POST'])
+def update_event_ticket():
+    data = request.json
+    if not data or not data.get('event_id') or not data.get('ticket_available'):
+        return jsonify({"error": "Invalid input"}), 400
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE events
+            SET ticket_available = %s WHERE id = %s RETURNING id;
+            """,
+            (data['ticket_available'], data['event_id'])
+        )
+
+        event_id = cursor.fetchone()[0]
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"id": event_id,"ticket_available": data['ticket_available']}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
 

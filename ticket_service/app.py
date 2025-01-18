@@ -17,7 +17,7 @@ def initialize_database():
     CREATE TABLE IF NOT EXISTS tickets (
         id SERIAL PRIMARY KEY,
         event_id VARCHAR(5) UNIQUE NOT NULL,
-        client_id VARCHAR(5) UNIQUE NOT NULL
+        user_id VARCHAR(5) UNIQUE NOT NULL
     );
     """
     try:
@@ -38,7 +38,7 @@ def get_db_connection():
 @app.route('/ticket', methods=['POST'])
 def create_ticket():
     data = request.json
-    if not data or not data.get('event_id') or not data.get('client_id'):
+    if not data or not data.get('event_id') or not data.get('user_id'):
         return jsonify({"error": "Invalid input"}), 400
 
     try:
@@ -46,13 +46,13 @@ def create_ticket():
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO tickets (event_id, client_id) VALUES (%s, %s) RETURNING id;",
-            (data['event_id'], data['client_id'])
+            "INSERT INTO tickets (event_id, user_id) VALUES (%s, %s) RETURNING id;",
+            (data['event_id'], str(data['user_id']))
         )
         ticket_id = cursor.fetchone()[0]
         conn.commit()
 
-        return jsonify({"id": ticket_id, "event_id": data['event_id'], "client_id": data['client_id']}), 201
+        return jsonify({"id": ticket_id, "event_id": data['event_id'], "user_id": data['user_id']}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:

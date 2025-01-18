@@ -75,7 +75,6 @@ def create_user():
         conn.close()
 
 @app.route('/login', methods=['POST'])
-@app.route('/login', methods=['POST'])
 def verificar_utilizador():
     user_data = request.json
 

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if($_SESSION['user_id'] == 2){
+if($_SESSION['user_id'] != 2){
     header("Location: index.php");
     exit();
 }
@@ -9,7 +9,7 @@ if($_SESSION['user_id'] == 2){
 $user_id = $_SESSION['user_id'];
 
 function getEventsFromManagement() {
-    $url = "http://10.110.234.111/management"; 
+    $url = "http://management_service:5000/management"; 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -17,15 +17,21 @@ function getEventsFromManagement() {
 
     if (curl_errno($ch)) {
         error_log('Error: ' . curl_error($ch));
-        echo "Erro ao conectar com o servidor Management.";
         return [];
     }
 
     curl_close($ch);
-    return json_decode($response, true);
+
+    $events = json_decode($response, true);
+
+    $events = array_filter($events, function($event) {
+        return $event['ticket_available'] > 0;
+    });
+    
+    return $events;
 }
 
-function getPurchasedTickets($client_id) {
+function getPurchasedTickets($user_id) {
     $url = "http://ticket_service:3000/ticket";
 
     $options = [
@@ -40,7 +46,6 @@ function getPurchasedTickets($client_id) {
     $response = @file_get_contents($url, false, $context);
     if ($response === FALSE) {
         error_log('Error: não foi possível conectar ao servidor de tickets.');
-        echo "Erro ao conectar com o servidor de tickets.";
         return [];
     }
     return json_decode($response, true);
@@ -55,7 +60,7 @@ function getEventsByIds($event_ids) {
         return [];
     }
 
-    $url = "http://10.110.234.111/management";
+    $url = "http://management_service:5000/management";
     $ids_query = implode(',', $event_ids);
     $url .= "?event_ids=" . urlencode($ids_query);
 
@@ -65,6 +70,17 @@ function getEventsByIds($event_ids) {
     }
     return json_decode($response, true);
 }
+
+function buyTicket(){
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $_SESSION['event_id'] = $_POST['event_id'];
+    
+        header("Location: ticket.php");
+    }
+}
+
+buyTicket();
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -139,6 +155,22 @@ function getEventsByIds($event_ids) {
             color: #ff6f61;
             margin-top: 20px;
         }
+        .back-button {
+            background: #6c757d;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+            color: white;
+        }
+        .back-button:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -155,11 +187,12 @@ function getEventsByIds($event_ids) {
                         <p><strong>Hora de começo:</strong> <?= htmlspecialchars($event['start_time'], ENT_QUOTES, 'UTF-8') ?></p>
                         <p><strong>Hora de término:</strong> <?= htmlspecialchars($event['end_time'], ENT_QUOTES, 'UTF-8') ?></p>
                         <p><strong>Informações adicionais:</strong> <?= htmlspecialchars($event['info'], ENT_QUOTES, 'UTF-8') ?></p>
+                        
+                        <form method="post" action="">
+                            <input type="hidden" name="event_id" value="<?= htmlspecialchars($event['id'], ENT_QUOTES, 'UTF-8') ?>">
+                            <button type="submit">Selecionar</button>
+                        </form>
                     </div>
-                    <form method="post" action="select_event.php">
-                        <input type="hidden" name="event_id" value="<?= htmlspecialchars($event['id'], ENT_QUOTES, 'UTF-8') ?>">
-                        <button type="submit">Selecionar</button>
-                    </form>
                 <?php endforeach; ?>
             <?php else: ?>
                 <p class="no-events">Não existem eventos.</p>
@@ -186,6 +219,7 @@ function getEventsByIds($event_ids) {
                 <p class="no-events">O utilizador ainda não comprou bilhetes.</p>
             <?php endif; ?>
         </div>
+        <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
     </div>
 </div>
 </body>

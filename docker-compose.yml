@@ -88,7 +88,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: payment_db
     ports:
-      - "5438:5438"
+      - "5438:5432"
     networks:
       - microservices-net
 
@@ -130,7 +130,7 @@ services:
     ports: 
       - "8080:80" 
     volumes: 
-      - ./php:/var/www/html 
+      - ./php_service:/var/www/html 
     networks: 
       - microservices-net
 
