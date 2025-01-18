@@ -209,6 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_payment'])) {
         <form method="post" action="">
             <label for="payment_method">Método de Pagamento:</label>
             <select name="payment_method" id="payment_method" onchange="this.form.submit()">
+                <option value="">Selecione...</option>
                 <option value="visa">Visa</option>
                 <option value="mastercard">MasterCard</option>
                 <option value="paypal">PayPal</option>

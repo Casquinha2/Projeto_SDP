@@ -193,79 +193,99 @@ $events = getEvents();
         .back-button:hover {
             background: #5a6268;
         }
+
+        .scroll-container {
+            max-height: 500px; /* Adjust the height as needed */
+            overflow-y: auto;
+            padding-right: 10px; /* Add some padding to the right to prevent content from being cut off by the scrollbar */
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #007BFF;
+            border-radius: 5px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
     </style>
 </head>
 <body>
 <div class="content">
     <div class="column">
         <h2>Eventos</h2>
-        <div class="event-list">
-            <?php if (!empty($events)): ?>
-                <?php foreach ($events as $event): ?>
-                    <div class="event-item">
-                        <div>
-                            <p><strong>Evento: <?= htmlspecialchars($event['event'], ENT_QUOTES, 'UTF-8') ?></strong></p>
-                            <p><strong>Local: </strong><?= htmlspecialchars($event['local'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Data: </strong><?= htmlspecialchars($event['date'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Horário de Início: </strong><?= htmlspecialchars($event['start_time'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Horário de Término: </strong> <?= htmlspecialchars($event['end_time'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Preço: </strong>€<?= htmlspecialchars($event['ticket_price'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Bilhetes totais: </strong><?= htmlspecialchars($event['ticket_total'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Bilhetes Disponíveis: </strong><?= htmlspecialchars($event['ticket_available'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <p><strong>Informações Adicionais: </strong><?= htmlspecialchars($event['info'], ENT_QUOTES, 'UTF-8') ?></p>
+        <div class="scroll-container">
+            <div class="event-list">
+                <?php if (!empty($events)): ?>
+                    <?php foreach ($events as $event): ?>
+                        <div class="event-item">
+                            <div>
+                                <p><strong>Evento: <?= htmlspecialchars($event['event'], ENT_QUOTES, 'UTF-8') ?></strong></p>
+                                <p><strong>Local: </strong><?= htmlspecialchars($event['local'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Data: </strong><?= htmlspecialchars($event['date'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Horário de Início: </strong><?= htmlspecialchars($event['start_time'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Horário de Término: </strong> <?= htmlspecialchars($event['end_time'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Preço: </strong>€<?= htmlspecialchars($event['ticket_price'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Bilhetes totais: </strong><?= htmlspecialchars($event['ticket_total'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Bilhetes Disponíveis: </strong><?= htmlspecialchars($event['ticket_available'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <p><strong>Informações Adicionais: </strong><?= htmlspecialchars($event['info'], ENT_QUOTES, 'UTF-8') ?></p>
+                            </div>
+                            <form method="post" action="">
+                                <input type="hidden" name="event_id" value="<?= htmlspecialchars($event['id'], ENT_QUOTES, 'UTF-8') ?>">
+                                <button type="submit" name="delete_event">Eliminar</button>
+                            </form>
                         </div>
-                        <form method="post" action="">
-                            <input type="hidden" name="event_id" value="<?= htmlspecialchars($event['id'], ENT_QUOTES, 'UTF-8') ?>">
-                            <button type="submit" name="delete_event">Eliminar</button>
-                        </form>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>Nenhum evento encontrado.</p>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>Nenhum evento encontrado.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="column">
+            <h2>Criar evento</h2>
+            <div class="scroll-container">
+            <?php if (!empty($response_message)): ?>
+                <p class="message"><?= htmlspecialchars($response_message, ENT_QUOTES, 'UTF-8') ?></p>
             <?php endif; ?>
+
+            <form method="post" action="">
+                <input type="hidden" name="create_event" value="1">
+                
+                <label for="event">Evento:</label>
+                <input type="text" id="event" name="event" required>
+
+                <label for="local">Local:</label>
+                <input type="text" id="local" name="local" required>
+                
+                <label for="date">Data:</label>
+                <input type="date" id="date" name="date" required>
+                
+                <label for="start_time">Hora de começo:</label>
+                <input type="time" id="start_time" name="start_time" required>
+                
+                <label for="end_time">Hora de término:</label>
+                <input type="time" id="end_time" name="end_time" required>
+                
+                <label for="total_tickets">Bilhetes totais:</label>
+                <input type="text" id="total_tickets" name="total_tickets" required>
+                
+                <label for="price">Preço por bilhete:</label>
+                <input type="text" id="price" name="price" required>
+
+                <label for="info">Informações adicionais:</label>
+                <textarea id="info" name="info"></textarea>
+
+                <input type="submit" value="Criar Evento">
+            </form>
+
+            <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
+            </div>
         </div>
     </div>
-    <div class="column">
-        <h2>Criar evento</h2>
-
-        <?php if (!empty($response_message)): ?>
-            <p class="message"><?= htmlspecialchars($response_message, ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endif; ?>
-
-        <form method="post" action="">
-            <input type="hidden" name="create_event" value="1">
-            
-            <label for="event">Evento:</label>
-            <input type="text" id="event" name="event" required>
-
-            <label for="local">Local:</label>
-            <input type="text" id="local" name="local" required>
-            
-            <label for="date">Data:</label>
-            <input type="date" id="date" name="date" required>
-            
-            <label for="start_time">Hora de começo:</label>
-            <input type="time" id="start_time" name="start_time" required>
-            
-            <label for="end_time">Hora de término:</label>
-            <input type="time" id="end_time" name="end_time" required>
-            
-            <label for="total_tickets">Bilhetes totais:</label>
-            <input type="text" id="total_tickets" name="total_tickets" required>
-            
-            <label for="price">Preço por bilhete:</label>
-            <input type="text" id="price" name="price" required>
-
-            <label for="info">Informações adicionais:</label>
-            <textarea id="info" name="info"></textarea>
-
-            <input type="submit" value="Criar Evento">
-        </form>
-
-        <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
-    </div>
-    
-
 </div>
 </body>
 </html>

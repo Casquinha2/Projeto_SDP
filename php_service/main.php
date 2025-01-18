@@ -278,6 +278,7 @@ buyTicket();
 
     <div class="section">
         <h2>Bilhetes Adquiridos</h2>
+        <div class="scroll-container">
         <div id="tickets">
             <?php if (!empty($events_user)): ?>
                 <?php foreach ($events_user as $ticket): ?>
@@ -296,6 +297,7 @@ buyTicket();
             <?php endif; ?>
         </div>
         <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
+        </div>
     </div>
 </div>
 </body>
