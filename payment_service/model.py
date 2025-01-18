@@ -1,7 +1,7 @@
 class Payment:
-    def __init__(self, payment_id, event_id, user_id, payment_method, name, card_number, validation_date, cvv, paypal_email):
+    def __init__(self, payment_id, ticket_id, user_id, payment_method, name, card_number, validation_date, cvv, paypal_email):
         self.payment_id = payment_id
-        self.event_id = event_id
+        self.ticket_id = ticket_id
         self.user_id = user_id
         self.payment_method = payment_method
         self.name = name
@@ -11,4 +11,4 @@ class Payment:
         self.paypal_email = paypal_email
 
     def to_dict(self):
-        return {'payment_id': self.payment_id, 'event_id': self.event_id, 'user_id': self.user_id, 'payment_method': self.payment_method, 'name': self.name, 'card_number': self.card_number, 'validation_date': self.validation_date, 'cvv': self.cvv, 'paypal_email': self.paypal_email}
+        return {'payment_id': self.payment_id, 'ticket_id': self.ticket_id, 'user_id': self.user_id, 'payment_method': self.payment_method, 'name': self.name, 'card_number': self.card_number, 'validation_date': self.validation_date, 'cvv': self.cvv, 'paypal_email': self.paypal_email}

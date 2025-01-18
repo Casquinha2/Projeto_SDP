@@ -1,13 +1,20 @@
 <?php
 session_start();
 
-$event_id = $_SESSION['event_id'];
-$user_id = $_SESSION['user_id'];
+$event_id = $_SESSION['event_id'] ?? null;
+$user_id = $_SESSION['user_id'] ?? null;
 $ticket_id = $_SESSION['ticket_id'] ?? null;
 
-if($_SESSION['user_id'] != 2){
+if(!isset($_SESSION['user_id']) || $_SESSION['user_id'] < 2){
     header("Location: index.php");
     exit();
+}
+
+if (isset($ticket_id)) {
+    error_log('Ticket ID in session: ' . $ticket_id);
+} else {
+    error_log('Erro: Ticket ID não encontrado na sessão.');
+    exit("Erro: Ticket ID não encontrado na sessão.");
 }
 
 $event = '';
@@ -17,15 +24,16 @@ $start_time = '';
 $end_time = '';
 $info = '';
 $price = 0.0;
-$available_tickets = 0;
+$ticket_available = 0;
 
 function getEventsByIds($event_id) {
-    global $event, $local, $date, $start_time, $end_time, $info, $price, $available_tickets;
+    global $event, $local, $date, $start_time, $end_time, $info, $price, $ticket_available;
 
     $url = "http://management_service:5000/management/" . $event_id;
 
     $response = file_get_contents($url);
     if ($response === FALSE) {
+        error_log('Erro ao buscar evento.');
         return [];
     }
 
@@ -35,12 +43,12 @@ function getEventsByIds($event_id) {
     if (!empty($event_data) && is_array($event_data)) {
         $event = $event_data['event'];
         $local = $event_data['local'];
-        $date = $event_data['data'];
+        $date = $event_data['date'];
         $start_time = $event_data['start_time'];
         $end_time = $event_data['end_time'];
         $info = $event_data['info'];
         $price = $event_data['ticket_price'];
-        $available_tickets = $event_data['ticket_available'];
+        $ticket_available = $event_data['ticket_available'];
     }
     return $event_data;
 }
@@ -48,13 +56,15 @@ function getEventsByIds($event_id) {
 // Fetch event data
 getEventsByIds($event_id);
 
-function updateEvent($event_id, $available_tickets) {
-    $available_tickets -= 1;
+function updateEvent($event_id, $ticket_available) {
+    if ($ticket_available > 0) {
+        $ticket_available -= 1;
+    }
 
-    $data = ['event_id' => $event_id, 'ticket_available' => $available_tickets];
+    $data = ['event_id' => $event_id, 'ticket_available' => $ticket_available];
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "http://management_service:5000/management");
+    curl_setopt($ch, CURLOPT_URL, "http://management_service:5000/update");
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -70,54 +80,53 @@ function updateEvent($event_id, $available_tickets) {
 }
 
 function storePayment() {
-    global $event_id, $user_id, $ticket_id, $available_tickets;
+    global $event_id, $user_id, $ticket_id, $ticket_available;
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $payment_method = $_POST['payment_method'];
-        $name = $_POST['name'];
-        $card_number = $_POST['card_number'];
-        $validation_date = $_POST['exp_date'];
-        $cvv = $_POST['cvv'];
-        $paypal_email = $_POST['paypal_account'] ?? null;
+    $payment_method = $_POST['payment_method'];
+    $name = $_POST['name'];
+    $card_number = $_POST['card_number'];
+    $validation_date = $_POST['exp_date'];
+    $cvv = $_POST['cvv'];
+    $paypal_email = $_POST['paypal_account'];
 
-        $data = [
-            'ticket_id' => $ticket_id,
-            'user_id' => $user_id,
-            'payment_method' => $payment_method,
-            'name' => $name,
-            'card_number' => $card_number,
-            'validation_date' => $validation_date,
-            'cvv' => $cvv,
-            'paypal_email' => $paypal_email
-        ];
+    $data = [
+        'ticket_id' => $ticket_id,
+        'user_id' => $user_id,
+        'payment_method' => $payment_method,
+        'name' => $name,
+        'card_number' => $card_number,
+        'validation_date' => $validation_date,
+        'cvv' => $cvv,
+        'paypal_email' => $paypal_email
+    ];
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://payment_service:4000/payments");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    error_log('Payment data: ' . print_r($data, true)); // Log the data being sent
 
-        $response = curl_exec($ch);
-        $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "http://payment_service:4000/payment");
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
-        if ($status_code === 201) {
-            updateEvent($event_id, $available_tickets);
-            header("Location: main.php");
-            exit();
-        } else {
-            $response_message = 'Erro ao realizar compra: ' . $response;
-            echo $response_message;
-        }
+    $response = curl_exec($ch);
+    $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($status_code === 201) {
+        updateEvent($event_id, $ticket_available);
+        header("Location: main.php");
+        exit();
+    } else {
+        $response_message = 'Erro ao realizar compra: ' . $response;
+        echo $response_message;
     }
 }
 
-// Check for form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_method'])) {
+// Check for final form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_payment'])) {
     storePayment();
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -210,6 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_method'])) {
     <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['payment_method'])): ?>
         <form method="post" action="">
             <input type="hidden" name="payment_method" value="<?= htmlspecialchars($_POST['payment_method']) ?>">
+            <input type="hidden" name="confirm_payment" value="1">
             
             <?php if ($_POST['payment_method'] === 'visa' || $_POST['payment_method'] === 'mastercard'): ?>
                 <label for="name">Nome Completo:</label>

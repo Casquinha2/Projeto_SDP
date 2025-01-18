@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+$_SESSION['user_id'] = 0;
+
 $response_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -18,12 +18,12 @@ def initialize_database():
         id SERIAL PRIMARY KEY,
         event VARCHAR(80) NOT NULL,
         local VARCHAR(120) NOT NULL,
-        data VARCHAR(120) NOT NULL,
+        date VARCHAR(120) NOT NULL,
         start_time VARCHAR(60) NOT NULL,
         end_time VARCHAR(60) NOT NULL,
         info TEXT,
         ticket_total INTEGER NOT NULL,
-        ticket_available INTEGER NOT NULL,
+        ticket_available INTEGER,
         ticket_price FLOAT NOT NULL
     );
     """
@@ -55,7 +55,7 @@ def get_db_connection():
 @app.route('/management', methods=['POST'])
 def create_event():
     data = request.json
-    if not data or not data.get('event') or not data.get('local') or not data.get('data') or not data.get('start_time') or not data.get('end_time') or not data.get('ticket_total') or not data.get('ticket_available') or not data.get('ticket_price'):
+    if not data or not data.get('event') or not data.get('local') or not data.get('date') or not data.get('start_time') or not data.get('end_time') or not data.get('ticket_total') or not data.get('ticket_available') or not data.get('ticket_price'):
         return jsonify({"error": "Invalid input"}), 400
     
     if data.get('info') == 'None':
@@ -66,8 +66,8 @@ def create_event():
         cursor = conn.cursor()
 
         cursor.execute(
-            "INSERT INTO events (event, local, data, start_time, end_time, info, ticket_total, ticket_available, ticket_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
-            (data['event'], data['local'], data['data'], data['start_time'], data['end_time'], data['info'], data['ticket_total'], data['ticket_available'], data['ticket_price'])
+            "INSERT INTO events (event, local, date, start_time, end_time, info, ticket_total, ticket_available, ticket_price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
+            (data['event'], data['local'], data['date'], data['start_time'], data['end_time'], data['info'], data['ticket_total'], data['ticket_available'], data['ticket_price'])
         )
 
         event_id = cursor.fetchone()[0]
@@ -75,7 +75,7 @@ def create_event():
         cursor.close()
         conn.close()
 
-        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "data": data['data'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info'], "ticket_total": data['ticket_total'], "ticket_available": data['ticket_available'], "ticket_price": data['ticket_price']}), 201
+        return jsonify({"id": event_id, "event": data['event'], "local":data['local'], "date": data['date'], "start_time": data['start_time'], "end_time": data['end_time'], "info":data['info'], "ticket_total": data['ticket_total'], "ticket_available": data['ticket_available'], "ticket_price": data['ticket_price']}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -112,11 +112,11 @@ def get_event_by_id(event_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route('/management', methods=['POST'])
+@app.route('/update', methods=['POST'])
 def update_event_ticket():
     data = request.json
-    if not data or not data.get('event_id') or not data.get('ticket_available'):
-        return jsonify({"error": "Invalid input"}), 400
+    if not data or not data.get('event_id') or data.get('ticket_available') < 0:
+        return jsonify({"error": f"Invalid input {data.get('event_id')}  tttttt   {data.get('ticket_available')}"}), 400
     
     try:
         conn = get_db_connection()
@@ -136,6 +136,22 @@ def update_event_ticket():
         conn.close()
 
         return jsonify({"id": event_id,"ticket_available": data['ticket_available']}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/management/<int:event_id>', methods=['DELETE'])
+def delete_event(event_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM events WHERE id = %s;", (event_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"id": event_id}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

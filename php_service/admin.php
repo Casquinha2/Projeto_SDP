@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if($_SESSION['user_id'] != 1){
+if ($_SESSION['user_id'] != 1) {
     header("Location: index.php");
     exit();
 }
@@ -24,7 +24,7 @@ function getEvents() {
     return json_decode($response, true);
 }
 
-function createEvent($data){
+function createEvent($data) {
     global $response_message;
 
     $url = "http://management_service:5000/management";
@@ -49,12 +49,28 @@ function createEvent($data){
     }
 }
 
+function deleteEvent($event_id) {
+    $url = "http://management_service:5000/management/" . $event_id;
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($status_code !== 200) {
+        error_log("Error deleting event: " . $response);
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['create_event'])) {
         $event_data = [
             'event' => $_POST['event'],
             'local' => $_POST['local'],
-            'data' => $_POST['date'],
+            'date' => $_POST['date'],
             'start_time' => $_POST['start_time'],
             'end_time' => $_POST['end_time'],
             'ticket_total' => $_POST['total_tickets'],
@@ -64,8 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         createEvent($event_data);
+    } elseif (isset($_POST['delete_event'])) {
+        deleteEvent($_POST['event_id']);
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
     }
 }
+
 $events = getEvents();
 ?>
 
@@ -184,11 +205,18 @@ $events = getEvents();
                     <div class="event-item">
                         <div>
                             <p><strong>Evento: <?= htmlspecialchars($event['event'], ENT_QUOTES, 'UTF-8') ?></strong></p>
-                            <p>Data: <?= htmlspecialchars($event['data'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Local: </strong><?= htmlspecialchars($event['local'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Data: </strong><?= htmlspecialchars($event['date'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Horário de Início: </strong><?= htmlspecialchars($event['start_time'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Horário de Término: </strong> <?= htmlspecialchars($event['end_time'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Preço: </strong>€<?= htmlspecialchars($event['ticket_price'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Bilhetes totais: </strong><?= htmlspecialchars($event['ticket_total'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Bilhetes Disponíveis: </strong><?= htmlspecialchars($event['ticket_available'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <p><strong>Informações Adicionais: </strong><?= htmlspecialchars($event['info'], ENT_QUOTES, 'UTF-8') ?></p>
                         </div>
-                        <form method="post" action="delete_event.php">
+                        <form method="post" action="">
                             <input type="hidden" name="event_id" value="<?= htmlspecialchars($event['id'], ENT_QUOTES, 'UTF-8') ?>">
-                            <button type="submit">Eliminar</button>
+                            <button type="submit" name="delete_event">Eliminar</button>
                         </form>
                     </div>
                 <?php endforeach; ?>

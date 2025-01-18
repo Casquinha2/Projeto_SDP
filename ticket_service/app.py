@@ -16,8 +16,8 @@ def initialize_database():
     create_table_query = """
     CREATE TABLE IF NOT EXISTS tickets (
         id SERIAL PRIMARY KEY,
-        event_id VARCHAR(5) UNIQUE NOT NULL,
-        user_id VARCHAR(5) UNIQUE NOT NULL
+        event_id VARCHAR(5) NOT NULL,
+        user_id VARCHAR(5) NOT NULL
     );
     """
     try:

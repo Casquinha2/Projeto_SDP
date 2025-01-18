@@ -4,11 +4,10 @@ session_start();
 $event_id = $_SESSION['event_id'];
 $user_id = $_SESSION['user_id'];
 
-if($_SESSION['user_id'] != 2){
+if(!isset($_SESSION['user_id']) || $_SESSION['user_id'] < 2){
     header("Location: index.php");
     exit();
 }
-
 $event = '';
 $local = '';
 $date = '';
@@ -16,10 +15,10 @@ $start_time = '';
 $end_time = '';
 $info = '';
 $price = 0.0;
-$available_tickets = 0;
+$ticket_available = 0;
 
 function getEventsByIds($event_id) {
-    global $event, $local, $date, $start_time, $end_time, $info, $price, $available_tickets;
+    global $event, $local, $date, $start_time, $end_time, $info, $price, $ticket_available;
 
     $url = "http://management_service:5000/management/" . $event_id;
 
@@ -34,12 +33,12 @@ function getEventsByIds($event_id) {
     if (!empty($event_data) && is_array($event_data)) {
         $event = $event_data['event'];
         $local = $event_data['local'];
-        $date = $event_data['data'];
+        $date = $event_data['date'];
         $start_time = $event_data['start_time'];
         $end_time = $event_data['end_time'];
         $info = $event_data['info'];
         $price = $event_data['ticket_price'];
-        $available_tickets = $event_data['ticket_available'];
+        $ticket_available = $event_data['ticket_available'];
     }
     return $event_data;
 }
@@ -47,34 +46,40 @@ function getEventsByIds($event_id) {
 // Fetch event data
 getEventsByIds($event_id);
 
-function addTicket(){
+function addTicket() {
     global $event_id, $user_id;
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = ['event_id' => $event_id, 'user_id' => $user_id];
-    
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "http://ticket_service:3000/ticket");
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    
+
         $response = curl_exec($ch);
         $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-    
+
         if ($status_code === 201) {
             $response_data = json_decode($response, true);
-            $_SESSION['ticket_id'] = $response_data['ticket_id'];
-            header('Location: payment.php');
-            exit();
+
+            if (!empty($response_data['id'])) {
+                $_SESSION['ticket_id'] = $response_data['id'];
+                header('Location: payment.php');
+                exit();
+            } else {
+                echo 'Erro: Ticket ID não foi criado corretamente.';
+            }
         } else {
             $response_message = 'Erro ao criar bilhete: ' . $response;
             echo $response_message;
         }
     }
 }
+
 
 // Check for form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

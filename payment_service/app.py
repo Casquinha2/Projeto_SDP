@@ -43,7 +43,7 @@ def get_db_connection():
 @app.route('/payment', methods=['POST'])
 def create_payment():
     data = request.json
-    if not data or not data.get('event_id') or not data.get('user_id') or not data.get('payment_method') or not data.get('name'):
+    if not data or not data.get('ticket_id') or not data.get('user_id') or not data.get('payment_method') or not data.get('name'):
         return jsonify({"error": "Entrada inválida"}), 400
     else:
         if (data.get('payment_method') == 'visa' or data.get('payment_method') == 'mastercard') and (not data.get('card_number') or not data.get('validation_date') or not data.get('cvv')):
@@ -58,13 +58,13 @@ def create_payment():
                 cursor = conn.cursor()
 
                 cursor.execute(
-                    "INSERT INTO payment (event_id, user_id, payment_method, name, card_number, validation_date, cvv, paypal_email) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
-                    (data['event_id'], data['user_id'], data['payment_method'], data['name'], data['card_number'], data['validation_date'], data['cvv'], data['paypal_email'])
+                    "INSERT INTO payment (ticket_id, user_id, payment_method, name, card_number, validation_date, cvv, paypal_email) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;",
+                    (str(data['ticket_id']), str(data['user_id']), data['payment_method'], data['name'], data['card_number'], data['validation_date'], data['cvv'], data['paypal_email'])
                 )
                 payment_id = cursor.fetchone()[0]
                 conn.commit()
 
-                return jsonify({"id": payment_id, "event_id": data['event_id'], "user_id": data['user_id'], "payment_method": data['payment_method'], "name": data['name'], "card_number": data['card_number'], "validation_date": data['validation_date'], "cvv": data['ccv'], "paypal_email": data['paypal_email']}), 201
+                return jsonify({"id": payment_id, "ticket_id": data['ticket_id'], "user_id": data['user_id'], "payment_method": data['payment_method'], "name": data['name'], "card_number": data['card_number'], "validation_date": data['validation_date'], "cvv": data['cvv'], "paypal_email": data['paypal_email']}), 201
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
             finally:
