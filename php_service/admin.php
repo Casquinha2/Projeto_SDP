@@ -153,7 +153,7 @@ $events = getEvents();
             background: #0056b3;
         }
         .event-list {
-            max-height: 500px;
+            max-height: 700px;
             overflow-y: auto;
         }
         .event-item {
@@ -195,7 +195,7 @@ $events = getEvents();
         }
 
         .scroll-container {
-            max-height: 500px; /* Adjust the height as needed */
+            max-height: 700px; /* Adjust the height as needed */
             overflow-y: auto;
             padding-right: 10px; /* Add some padding to the right to prevent content from being cut off by the scrollbar */
         }
@@ -218,8 +218,8 @@ $events = getEvents();
 <div class="content">
     <div class="column">
         <h2>Eventos</h2>
-        <div class="scroll-container">
             <div class="event-list">
+            <div class="scroll-container">
                 <?php if (!empty($events)): ?>
                     <?php foreach ($events as $event): ?>
                         <div class="event-item">
@@ -245,47 +245,46 @@ $events = getEvents();
                 <?php endif; ?>
             </div>
         </div>
-        <div class="column">
-            <h2>Criar evento</h2>
-            <div class="scroll-container">
-            <?php if (!empty($response_message)): ?>
-                <p class="message"><?= htmlspecialchars($response_message, ENT_QUOTES, 'UTF-8') ?></p>
-            <?php endif; ?>
+    </div>
+    <div class="column">
+        <h2>Criar evento</h2>
+        <?php if (!empty($response_message)): ?>
+            <p class="message"><?= htmlspecialchars($response_message, ENT_QUOTES, 'UTF-8') ?></p>
+        <?php endif; ?>
 
-            <form method="post" action="">
-                <input type="hidden" name="create_event" value="1">
-                
-                <label for="event">Evento:</label>
-                <input type="text" id="event" name="event" required>
+        <form method="post" action="">
+            <input type="hidden" name="create_event" value="1">
+            
+            <label for="event">Evento:</label>
+            <input type="text" id="event" name="event" required>
 
-                <label for="local">Local:</label>
-                <input type="text" id="local" name="local" required>
-                
-                <label for="date">Data:</label>
-                <input type="date" id="date" name="date" required>
-                
-                <label for="start_time">Hora de começo:</label>
-                <input type="time" id="start_time" name="start_time" required>
-                
-                <label for="end_time">Hora de término:</label>
-                <input type="time" id="end_time" name="end_time" required>
-                
-                <label for="total_tickets">Bilhetes totais:</label>
-                <input type="text" id="total_tickets" name="total_tickets" required>
-                
-                <label for="price">Preço por bilhete:</label>
-                <input type="text" id="price" name="price" required>
+            <label for="local">Local:</label>
+            <input type="text" id="local" name="local" required>
+            
+            <label for="date">Data:</label>
+            <input type="date" id="date" name="date" required>
+            
+            <label for="start_time">Hora de começo:</label>
+            <input type="time" id="start_time" name="start_time" required>
+            
+            <label for="end_time">Hora de término:</label>
+            <input type="time" id="end_time" name="end_time" required>
+            
+            <label for="total_tickets">Bilhetes totais:</label>
+            <input type="text" id="total_tickets" name="total_tickets" required>
+            
+            <label for="price">Preço por bilhete:</label>
+            <input type="text" id="price" name="price" required>
 
-                <label for="info">Informações adicionais:</label>
-                <textarea id="info" name="info"></textarea>
+            <label for="info">Informações adicionais:</label>
+            <textarea id="info" name="info"></textarea>
 
-                <input type="submit" value="Criar Evento">
-            </form>
+            <input type="submit" value="Criar Evento">
+        </form>
 
-            <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
-            </div>
-        </div>
+        <button class="back-button" onclick="window.location.href='index.php'">Logout</button>
     </div>
 </div>
+
 </body>
 </html>

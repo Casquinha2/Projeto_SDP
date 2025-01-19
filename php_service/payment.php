@@ -10,9 +10,7 @@ if(!isset($_SESSION['user_id']) || $_SESSION['user_id'] < 2){
     exit();
 }
 
-if (isset($ticket_id)) {
-    error_log('Ticket ID in session: ' . $ticket_id);
-} else {
+if (!isset($ticket_id)) {
     error_log('Erro: Ticket ID não encontrado na sessão.');
     exit("Erro: Ticket ID não encontrado na sessão.");
 }
@@ -100,7 +98,6 @@ function storePayment() {
         'paypal_email' => $paypal_email
     ];
 
-    error_log('Payment data: ' . print_r($data, true)); // Log the data being sent
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "http://payment_service:4000/payment");

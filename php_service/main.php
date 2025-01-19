@@ -57,16 +57,11 @@ function getEventIdsFromPurchasedTickets($user_id) {
         return [];
     }
 
-    // Log the tickets for debugging
-    error_log('Tickets: ' . print_r($tickets, true));
-
     // Filter tickets by user_id
     $user_tickets = array_filter($tickets, function($ticket) use ($user_id) {
         return (int)$ticket['user_id'] === (int)$user_id;
     });
 
-    // Log the user tickets for debugging
-    error_log('User Tickets: ' . print_r($user_tickets, true));
 
     // Extract event_id from the filtered tickets
     $events_user = array_map(function($ticket) {
@@ -99,8 +94,6 @@ function getEventsByIds($event_ids) {
         return [];
     }
 
-    // Log the events for debugging
-    error_log('Events by IDs: ' . print_r($events, true));
 
     // Map events to their IDs
     $events_by_id = [];
