@@ -10,10 +10,10 @@ A adição e remoção dos eventos é feita no painel de administrador.
 Na compra de um bilhete o utilizador tem vários métodos de pagamento que poderá escolher (como é um projeto universitário o utilizador não chega a comprar bilhetes).
 
 ## Linguagens usadas no projeto
-- Python - usada para o backend da plataforma
-- HTML - usada para fazer o frontend
-- CSS - usada para fazer o design do frontend
-- PHP - usada para fazer a interligação entre o frontend e o backend
+- Python - usada para o backend da plataforma;
+- HTML - usada para fazer o frontend;
+- CSS - usada para fazer o design do frontend;
+- PHP - usada para fazer a interligação entre o frontend e o backend.
 
 Neste projeto ainda foi usado o Docker com os Kubernetes para simular vários serviços em diferentes máquinas, sendo que houve problemas com os comandos para a implementação dos Kubernetes.  
 
